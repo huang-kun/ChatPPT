@@ -3,7 +3,7 @@ from input_parser import parse_input_text
 from ppt_generator import generate_presentation
 from template_manager import load_template, get_layout_mapping, print_layouts
 
-def main():
+def generate_course_ppt():
     input_text = """
     # ChatPPT_Demo
 
@@ -21,8 +21,28 @@ def main():
     - 产品B: 市场定位
     ![未来增长](images/forecast.png)
     """
+    generate_ppt(input_text, 'MasterTemplate.pptx')
 
-    template_file = 'templates/MasterTemplate.pptx'
+def generate_homework_ppt():
+    input_text = """
+    # ChatPPT_Homework
+
+    ## ChatPPT Homework [Title]
+
+    ## 2024 业绩概述 [Summary]
+    - 总收入增长15%
+    - 市场份额扩大至30%
+    ![业绩图表](images/performance_chart.png)
+
+    ## 新产品发布 [Summary]
+    - 产品A: 特色功能介绍
+    - 产品B: 市场定位
+    ![未来增长](images/forecast.png)
+    """
+    generate_ppt(input_text, 'Fair_frames_presentation.pptx')
+
+def generate_ppt(input_text, template_filename):
+    template_file = f'templates/{template_filename}'
     prs = load_template(template_file)
 
     print("Available Slide Layouts:")
@@ -36,4 +56,4 @@ def main():
     generate_presentation(powerpoint_data, template_file, output_pptx)
 
 if __name__ == "__main__":
-    main()
+    generate_course_ppt()

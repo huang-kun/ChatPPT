@@ -1,13 +1,14 @@
 import os
 from pptx import Presentation
-from utils import remove_all_slides
+from utils import *
 
 def generate_presentation(powerpoint_data, template_path: str, output_path: str):
     if not os.path.exists(template_path):
         raise FileNotFoundError(f"Template file '{template_path}' does not exist.")
 
     prs = Presentation(template_path)
-    remove_all_slides(prs)
+    default_slides_count = get_slides_count(prs)
+
     prs.core_properties.title = powerpoint_data.title
 
     for slide in powerpoint_data.slides:
@@ -38,5 +39,9 @@ def generate_presentation(powerpoint_data, template_path: str, output_path: str)
                     if shape.placeholder_format.type == 18:
                         shape.insert_picture(image_full_path)
                         break
+    
+    # 默认幻灯片放在最后删除，是为了避免作业里的模板出错。
+    remove_slides(prs, count=default_slides_count)
+
     prs.save(output_path)
     print(f"Presentation saved to '{output_path}'")
