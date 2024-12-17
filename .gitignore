@@ -163,5 +163,5 @@ cython_debug/
 
 
 # ChatPPT custom config
-outputs/*
+#outputs/*
 .DS_STore
