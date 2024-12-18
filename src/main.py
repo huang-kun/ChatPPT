@@ -6,6 +6,7 @@ from template_manager import load_template, get_layout_mapping, print_layouts
 from layout_manager import LayoutManager
 from config import Config
 from logger import LOG  # 引入 LOG 模块
+import chatbot
 
 # 定义主函数，处理输入并生成 PowerPoint 演示文稿
 def main(input_file):
@@ -39,8 +40,8 @@ def main(input_file):
     # 调用 generate_presentation 函数生成 PowerPoint 演示文稿
     generate_presentation(powerpoint_data, config.ppt_template, output_pptx)
 
-# 程序入口
-if __name__ == "__main__":
+
+def cli_entry():
     # 设置命令行参数解析器
     parser = argparse.ArgumentParser(description='从 markdown 文件生成 PowerPoint 演示文稿。')
     parser.add_argument(
@@ -55,3 +56,9 @@ if __name__ == "__main__":
 
     # 使用解析后的输入文件参数运行主函数
     main(args.input_file)
+
+
+# 程序入口
+if __name__ == "__main__":
+    chatbot.generate_ppt_function = main
+    chatbot.create_chatbot()
