@@ -10,6 +10,7 @@ from langchain_core.runnables.history import RunnableWithMessageHistory  # 导�
 
 from logger import LOG  # 导入日志工具
 from chat_history import get_session_history
+import os
 
 
 class ChatBot(ABC):
@@ -44,7 +45,7 @@ class ChatBot(ABC):
         ])
 
         # 初始化 ChatOllama 模型，配置参数
-        self.chatbot = system_prompt | ChatOpenAI(model="gpt-4o-mini")  # 使用的模型名称)
+        self.chatbot = system_prompt | ChatOpenAI(model="gpt-4o-mini", base_url=os.environ['OPENAI_BASE_URL'])  # 使用的模型名称)
 
         # 将聊天机器人与消息历史记录关联
         self.chatbot_with_history = RunnableWithMessageHistory(self.chatbot, get_session_history)
