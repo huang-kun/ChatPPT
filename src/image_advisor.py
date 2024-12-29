@@ -72,7 +72,7 @@ class ImageAdvisor(ABC):
 
         for slide_title, query in keywords.items():
             # 检索图像
-            images = self.get_bing_images(slide_title, query, num_images, timeout=1, retries=3)
+            images = self.get_bing_images(slide_title, query, num_images, timeout=30, retries=3)
             if images:
                 for image in images:
                     LOG.debug(f"Name: {image['slide_title']}, Query: {image['query']} 分辨率：{image['width']}x{image['height']}")
@@ -105,7 +105,7 @@ class ImageAdvisor(ABC):
         LOG.debug(f"[检索关键词 正则提取结果]{keywords}")
         return keywords
 
-    def get_bing_images(self, slide_title, query, num_images=5, timeout=1, retries=3):
+    def get_bing_images(self, slide_title, query, num_images=5, timeout=30, retries=3):
         """
         从 Bing 检索图像，最多重试3次。
 
@@ -196,6 +196,10 @@ class ImageAdvisor(ABC):
                 format = "PNG"
                 save_options = {"optimize": True}
             else:
+                # Failed to save image: cannot write mode P as JPEG
+                # https://stackoverflow.com/a/59476938/8330209
+                img = img.convert('RGB')
+
                 save_options = {
                     "quality": quality,
                     "optimize": True,
