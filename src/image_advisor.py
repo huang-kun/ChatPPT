@@ -11,6 +11,14 @@ from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
 
 from logger import LOG  # 导入日志工具
+from minicpm_v_model import chat_with_image
+
+import torch
+from diffusers import StableDiffusion3Pipeline
+
+# 加载SD模型
+pipe = StableDiffusion3Pipeline.from_pretrained("stabilityai/stable-diffusion-3.5-medium", torch_dtype=torch.bfloat16)
+pipe = pipe.to("cuda")
 
 class ImageAdvisor(ABC):
     """
@@ -88,8 +96,42 @@ class ImageAdvisor(ABC):
             self.save_image(img["obj"], save_path)
             image_pair[img["slide_title"]] = save_path
 
+            # 检查图片与描述的相关性
+            prompt = '请根据以下描述，从0到100分之间选择一个合适的分数来体现该图片与描述的相关性，要求只回复分数，格式：{x}分，举例：75分。\n----\n' + query
+            result = chat_with_image(save_path, question=prompt)
+            score = self.get_image_score(result)
+            LOG.debug(f"[Advisor 图片打分]: {score}, for: {query}")
+
+            # 如果分数低于预期，就换成SD生成图片
+            if score < 60:
+                LOG.debug(f"[Advisor 图片生成]: 正在生成中...")
+
+                image = pipe(
+                    query,
+                    num_inference_steps=40,
+                    guidance_scale=4.5,
+                ).images[0]
+
+                self.save_image(image, save_path)
+
         content_with_images = self.insert_images(markdown_content, image_pair)
         return content_with_images, image_pair
+    
+    def get_image_score(self, result):
+        if isinstance(result, int):
+            return result
+        elif not isinstance(result, str):
+            return 0
+        
+        if result.isdigit():
+            return int(result)
+        
+        match = re.search(r"\d+分", result)
+        if match:
+            score = match.group()[:-1]
+            return int(score)
+        else:
+            return 0
 
     def get_keywords(self, advice):
         """
